@@ -1,14 +1,14 @@
 from pathlib import Path
 
-from loader import load_metadata, load_ratings
-from schema import Entry, Play, PlayedSong
+from loader import _compute_remote_id, load_metadata, load_ratings
+from schema import Play, PlayedSong, Song
 
 
 def test_loading_metadata(testdata_dir: Path) -> None:
     path = testdata_dir / "metadata.json"
     got = load_metadata(path)
-    assert got == [
-        Entry(
+    assert got == {
+        _compute_remote_id("abc/one"): Song(
             path=Path("abc/one"),
             timestamp=123,
             loop_start=12,
@@ -18,8 +18,10 @@ def test_loading_metadata(testdata_dir: Path) -> None:
             title="song one",
             game_title="game one",
             error=False,
+            absolute_path=testdata_dir / "abc/one",
+            remote_id=_compute_remote_id("abc/one"),
         ),
-        Entry(
+        _compute_remote_id("abc/two"): Song(
             path=Path("abc/two"),
             timestamp=456,
             loop_start=13,
@@ -29,8 +31,10 @@ def test_loading_metadata(testdata_dir: Path) -> None:
             title="song two",
             game_title="game two",
             error=False,
+            absolute_path=testdata_dir / "abc/two",
+            remote_id=_compute_remote_id("abc/two"),
         ),
-        Entry(
+        _compute_remote_id("abc/three"): Song(
             path=Path("abc/three"),
             timestamp=789,
             loop_start=0,
@@ -40,30 +44,32 @@ def test_loading_metadata(testdata_dir: Path) -> None:
             title="song three",
             game_title="game three",
             error=True,
+            absolute_path=testdata_dir / "abc/three",
+            remote_id=_compute_remote_id("abc/three"),
         ),
-    ]
+    }
 
 
 def test_loading_ratings(testdata_dir: Path) -> None:
     path = testdata_dir / "ratings.json"
     got = load_ratings(path)
-    assert got == [
-        PlayedSong(
+    assert got == {
+        _compute_remote_id("abc/one"): PlayedSong(
             path=Path("abc/one"),
             plays=[
                 Play(timestamp=123, rating=1),
                 Play(timestamp=456, rating=2),
             ],
         ),
-        PlayedSong(
+        _compute_remote_id("abc/two"): PlayedSong(
             path=Path("abc/two"),
             plays=[
                 Play(timestamp=789, rating=4),
                 Play(timestamp=101, rating=5),
             ],
         ),
-        PlayedSong(
+        _compute_remote_id("abc/three"): PlayedSong(
             path=Path("abc/three"),
             plays=[],
         ),
-    ]
+    }
