@@ -1,0 +1,35 @@
+[
+  {
+    "path": "abc/one",
+    "timestamp": 123,
+    "loop_start": 12,
+    "loop_end": 0,
+    "duration": 1.2,
+    "size": 111,
+    "title": "song one",
+    "game_title": "game one",
+    "error": false
+  },
+  {
+    "path": "abc/two",
+    "timestamp": 456,
+    "loop_start": 13,
+    "loop_end": 0,
+    "duration":21.2,
+    "size": 222,
+    "title": "song two",
+    "game_title": "game two",
+    "error": false
+  },
+  {
+    "path": "abc/three",
+    "timestamp": 789,
+    "loop_start": 0,
+    "loop_end": 0,
+    "duration": 3.2,
+    "size": 333,
+    "title": "song three",
+    "game_title": "game three",
+    "error": true
+  }
+]

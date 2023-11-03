@@ -1,0 +1,32 @@
+[
+  {
+    "path": "abc/one",
+    "plays": [
+      {
+        "timestamp": 123,
+        "rating": 1
+      },
+      {
+        "timestamp": 456,
+        "rating": 2
+      }
+    ]
+  },
+  {
+    "path": "abc/two",
+    "plays": [
+      {
+        "timestamp": 789,
+        "rating": 4
+      },
+      {
+        "timestamp": 101,
+        "rating": 5
+      }
+    ]
+  },
+  {
+    "path": "abc/three",
+    "plays": []
+  }
+]
