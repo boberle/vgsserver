@@ -45,7 +45,7 @@ def _(
     current_user: User = Depends(get_current_user),
 ) -> SongResponse:
     song = configuration.songs.get_random_song(
-        ratings=configuration.ratings,
+        ratings=configuration.get_ratings_for_user(current_user.username),
         min_duration=min_duration,
         title_contains=title_contains,
         game_title_contains=game_title_contains,
@@ -90,11 +90,12 @@ def add_song_play(
     song = configuration.songs.get_song_by_id(song_id=song_id)
     if song is None:
         raise HTTPException(status_code=404, detail="Song not found")
-    configuration.ratings.add_play(
+    ratings = configuration.get_ratings_for_user(current_user.username)
+    ratings.add_play(
         song_id=song_id,
         song_path=song.path,
         timestamp=request.timestamp,
         rating=request.rating,
     )
-    configuration.ratings.save()
-    return SongPlayResponse(rating=configuration.ratings.get_rating(song_id))
+    ratings.save()
+    return SongPlayResponse(rating=ratings.get_rating(song_id))

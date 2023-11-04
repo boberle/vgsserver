@@ -20,11 +20,13 @@ def temp_directory() -> Generator[Path, None, None]:
 
 @pytest.fixture
 def test_configuration(testdata_dir: Path, temp_directory: Path) -> AppConfiguration:
-    shutil.copy2(testdata_dir / "ratings.json", temp_directory)
+    rating_dir = temp_directory / "ratings"
+    (rating_dir / "testuser").mkdir(exist_ok=False, parents=True)
+    shutil.copy2(testdata_dir / "ratings.json", rating_dir / "testuser")
     return AppConfiguration(
         settings=AppSettings(
             METADATA_PATH=testdata_dir / "metadata.json",
-            RATING_PATH=temp_directory / "ratings.json",
+            RATING_DIR_PATH=rating_dir,
             USER_PATH=testdata_dir / "users.json",
         ),
         random_seed=1,
@@ -111,11 +113,15 @@ def test_add_play(
     assert res.json() == {"rating": 3.6666666666666665}
 
     assert (
-        conf.ratings.get_rating("60634790d4629086cc180b012a2083c4")
+        conf.get_ratings_for_user("testuser").get_rating(
+            "60634790d4629086cc180b012a2083c4"
+        )
         == 3.6666666666666665
     )
 
-    new_ratings = InMemoryRatingRepository.from_file(conf.settings.RATING_PATH)
+    new_ratings = InMemoryRatingRepository.from_file(
+        conf.settings.RATING_DIR_PATH / "testuser" / "ratings.json"
+    )
     assert (
         new_ratings.get_rating("60634790d4629086cc180b012a2083c4") == 3.6666666666666665
     )

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from functools import cached_property
+from functools import cache, cached_property
 from pathlib import Path
 from random import Random
 from typing import Optional
@@ -15,7 +15,7 @@ class AppSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="VGSSERVER_")
 
     METADATA_PATH: Path = Path("/songs/metadata.json")
-    RATING_PATH: Path = Path("/ratings.json")
+    RATING_DIR_PATH: Path = Path("/ratings/")
     USER_PATH: Path = Path("/users.json")
 
 
@@ -31,9 +31,11 @@ class AppConfiguration:
             random=self.random,
         )
 
-    @cached_property
-    def ratings(self) -> RatingRepository:
-        return InMemoryRatingRepository.from_file(self.settings.RATING_PATH)
+    @cache
+    def get_ratings_for_user(self, username: str) -> RatingRepository:
+        self.settings.RATING_DIR_PATH.mkdir(exist_ok=True)
+        path = self.settings.RATING_DIR_PATH / username / "ratings.json"
+        return InMemoryRatingRepository.from_file(path)
 
     @cached_property
     def random(self) -> Random:
@@ -42,6 +44,9 @@ class AppConfiguration:
     @cached_property
     def users(self) -> UserRepository:
         return InMemoryUserRepository.from_file(self.settings.USER_PATH)
+
+    def __hash__(self) -> int:
+        return id(self)
 
 
 _app_configuration = AppConfiguration(settings=AppSettings())
