@@ -78,13 +78,13 @@ class InMemorySongRepository(SongRepository):
             if (
                 title_contains is not None
                 and song.title is not None
-                and title_contains not in song.title
+                and title_contains.casefold() not in song.title.casefold()
             ):
                 continue
             if (
                 game_title_contains is not None
                 and song.game_title is not None
-                and game_title_contains not in song.game_title
+                and game_title_contains.casefold() not in song.game_title.casefold()
             ):
                 continue
             if only_has_rating and ratings.song_has_no_rating(song.remote_id):
