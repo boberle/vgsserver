@@ -31,7 +31,7 @@ class AppConfiguration:
             random=self.random,
         )
 
-    @property
+    @cached_property
     def ratings(self) -> RatingRepository:
         return InMemoryRatingRepository.from_file(self.settings.RATING_PATH)
 

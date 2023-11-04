@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -69,3 +69,32 @@ def get_song_file(
 ) -> Response:
     content = configuration.songs.get_file(song_id)
     return Response(content=content, media_type="application/octet-stream")
+
+
+class SongPlayRequest(BaseModel):
+    timestamp: int
+    rating: Literal[1, 2, 3, 4, 5]
+
+
+class SongPlayResponse(BaseModel):
+    rating: Optional[float]
+
+
+@api_router.post("/songs/{song_id:str}/play/")
+def add_song_play(
+    request: SongPlayRequest,
+    song_id: str,
+    configuration: AppConfiguration = Depends(get_app_configuration),
+    current_user: User = Depends(get_current_user),
+) -> SongPlayResponse:
+    song = configuration.songs.get_song_by_id(song_id=song_id)
+    if song is None:
+        raise HTTPException(status_code=404, detail="Song not found")
+    configuration.ratings.add_play(
+        song_id=song_id,
+        song_path=song.path,
+        timestamp=request.timestamp,
+        rating=request.rating,
+    )
+    configuration.ratings.save()
+    return SongPlayResponse(rating=configuration.ratings.get_rating(song_id))
