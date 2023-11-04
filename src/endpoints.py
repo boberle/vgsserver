@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -32,6 +33,10 @@ class SongResponse(BaseModel):
     id: str
     title: Optional[str]
     game_title: Optional[str]
+    duration: float
+    loop_start: int
+    loop_end: int
+    path: Path
 
 
 @api_router.get("/songs/random/")
@@ -58,6 +63,10 @@ def _(
         id=song.remote_id,
         title=song.title,
         game_title=song.game_title,
+        duration=song.duration,
+        loop_start=song.loop_start,
+        loop_end=song.loop_end,
+        path=song.path,
     )
 
 

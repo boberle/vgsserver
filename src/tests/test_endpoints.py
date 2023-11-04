@@ -72,6 +72,10 @@ def test_get_random_song(client: TestClient, authorization_header: str) -> None:
         id="60634790d4629086cc180b012a2083c4",
         title="song two",
         game_title="game two",
+        loop_start=13,
+        loop_end=0,
+        path="abc/two",
+        duration=21.2,
     )
 
 
