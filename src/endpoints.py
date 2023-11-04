@@ -82,7 +82,7 @@ def get_song_file(
 
 class SongPlayRequest(BaseModel):
     timestamp: int
-    rating: Literal[1, 2, 3, 4, 5]
+    rating: Literal[0, 1, 2, 3, 4, 5]
 
 
 class SongPlayResponse(BaseModel):

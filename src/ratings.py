@@ -32,7 +32,7 @@ class RatingRepository(ABC):
         song_id: str,
         song_path: Path,
         timestamp: int,
-        rating: Literal[1, 2, 3, 4, 5],
+        rating: Literal[0, 1, 2, 3, 4, 5],
     ) -> None:
         ...  # pragma:nocover
 
@@ -43,7 +43,7 @@ class RatingRepository(ABC):
 
 class Play(BaseModel):
     timestamp: int
-    rating: Literal[1, 2, 3, 4, 5]
+    rating: Literal[0, 1, 2, 3, 4, 5]
 
 
 class PlayedSong(BaseModel):
@@ -52,9 +52,10 @@ class PlayedSong(BaseModel):
 
     @property
     def rating(self) -> Optional[float]:
-        if len(self.plays) == 0:
+        plays = [p for p in self.plays if p.rating]
+        if len(plays) == 0:
             return None
-        return sum([p.rating for p in self.plays]) / len(self.plays)
+        return sum([p.rating for p in plays]) / len(plays)
 
 
 @dataclass
@@ -79,7 +80,7 @@ class InMemoryRatingRepository(RatingRepository):
         song_id: str,
         song_path: Path,
         timestamp: int,
-        rating: Literal[1, 2, 3, 4, 5],
+        rating: Literal[0, 1, 2, 3, 4, 5],
     ) -> None:
         played_song = self.ratings.get(song_id)
         play = Play(timestamp=timestamp, rating=rating)
