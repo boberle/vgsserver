@@ -1,11 +1,30 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 
-from configuration import AppConfiguration
+from configuration import AppConfiguration, get_app_configuration
+from users import User
 
 api_router = APIRouter()
+
+
+def get_current_user(
+    credentials: HTTPBasicCredentials = Depends(HTTPBasic()),
+    configuration: AppConfiguration = Depends(get_app_configuration),
+) -> User:
+    user = configuration.users.get_user(
+        username=credentials.username.encode(),
+        password=credentials.password.encode(),
+    )
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return user
 
 
 class SongResponse(BaseModel):
@@ -21,7 +40,8 @@ def _(
     game_title_contains: Optional[str] = None,
     min_rating: Optional[int] = None,
     only_has_rating: Optional[bool] = None,
-    configuration: AppConfiguration = Depends(AppConfiguration),
+    configuration: AppConfiguration = Depends(get_app_configuration),
+    current_user: User = Depends(get_current_user),
 ) -> SongResponse:
     song = configuration.songs.get_random_song(
         ratings=configuration.ratings,
