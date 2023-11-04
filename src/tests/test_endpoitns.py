@@ -5,7 +5,7 @@ import pytest
 from starlette.testclient import TestClient
 
 from app import app
-from configuration import AppConfiguration, AppSettings
+from configuration import AppConfiguration, AppSettings, get_app_configuration
 
 
 @pytest.fixture
@@ -21,7 +21,7 @@ def test_configuration(testdata_dir: Path) -> AppConfiguration:
 
 @pytest.fixture
 def client(test_configuration: AppConfiguration) -> Iterator[TestClient]:
-    app.dependency_overrides[AppConfiguration] = lambda: test_configuration
+    app.dependency_overrides[get_app_configuration] = lambda: test_configuration
     yield TestClient(app)
     app.dependency_overrides = {}
 

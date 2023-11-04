@@ -35,3 +35,10 @@ class AppConfiguration:
     @property
     def random(self) -> Random:
         return Random(self.random_seed)
+
+
+_app_configuration = AppConfiguration(settings=AppSettings())
+
+
+def get_app_configuration() -> AppConfiguration:
+    return _app_configuration
