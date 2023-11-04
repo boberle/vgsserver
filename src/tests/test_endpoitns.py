@@ -52,3 +52,18 @@ def test_get_random_song(client: TestClient, authorization_header: str) -> None:
         title="song two",
         game_title="game two",
     )
+
+
+def test_get_song_file__not_authenticated(client: TestClient) -> None:
+    res = client.get("/api/songs/60634790d4629086cc180b012a2083c4/file/")
+    assert res.status_code == 401
+    assert res.json() == {"detail": "Not authenticated"}
+
+
+def test_get_song_file(client: TestClient, authorization_header: str) -> None:
+    res = client.get(
+        "/api/songs/60634790d4629086cc180b012a2083c4/file/",
+        headers={"Authorization": authorization_header},
+    )
+    assert res.status_code == 200
+    assert res.content == b"content two"

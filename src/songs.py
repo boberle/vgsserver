@@ -45,6 +45,10 @@ class SongRepository(ABC):
     ) -> Optional[Song]:
         ...  # pragma:nocover
 
+    @abstractmethod
+    def get_file(self, song_id: str) -> bytes:
+        ...  # pragma:nocover
+
 
 @dataclass
 class InMemorySongRepository(SongRepository):
@@ -112,3 +116,6 @@ class InMemorySongRepository(SongRepository):
             songs=dict(make_song(e) for e in entries),
             random=random,
         )
+
+    def get_file(self, song_id: str) -> bytes:
+        return self.songs[song_id].absolute_path.read_bytes()

@@ -3,6 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
+from starlette.responses import Response
 
 from configuration import AppConfiguration, get_app_configuration
 from users import User
@@ -58,3 +59,13 @@ def _(
         title=song.title,
         game_title=song.game_title,
     )
+
+
+@api_router.get("/songs/{song_id:str}/file/")
+def get_song_file(
+    song_id: str,
+    configuration: AppConfiguration = Depends(get_app_configuration),
+    current_user: User = Depends(get_current_user),
+) -> Response:
+    content = configuration.songs.get_file(song_id)
+    return Response(content=content, media_type="application/octet-stream")
