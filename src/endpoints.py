@@ -71,7 +71,7 @@ def _(
 
 
 @api_router.get("/songs/{song_id:str}/file/")
-def get_song_file(
+def _(
     song_id: str,
     configuration: AppConfiguration = Depends(get_app_configuration),
     current_user: User = Depends(get_current_user),
@@ -90,7 +90,7 @@ class SongPlayResponse(BaseModel):
 
 
 @api_router.post("/songs/{song_id:str}/play/")
-def add_song_play(
+def _(
     request: SongPlayRequest,
     song_id: str,
     configuration: AppConfiguration = Depends(get_app_configuration),
