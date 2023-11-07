@@ -101,11 +101,15 @@ class InMemoryRatingRepository(RatingRepository):
                     default=pydantic_encoder,
                 )
 
-    @staticmethod
-    def from_file(file: Path) -> InMemoryRatingRepository:
-        data = json.loads(file.read_text())
-        played_songs = pydantic.TypeAdapter(list[PlayedSong]).validate_python(data)
+    @classmethod
+    def from_file(cls, file: Path) -> InMemoryRatingRepository:
+        played_songs = cls.load_songs_from_file(file)
         return InMemoryRatingRepository(
             ratings={_compute_remote_id(p.path): p for p in played_songs},
             file=file,
         )
+
+    @staticmethod
+    def load_songs_from_file(file: Path) -> list[PlayedSong]:
+        data = json.loads(file.read_text())
+        return pydantic.TypeAdapter(list[PlayedSong]).validate_python(data)

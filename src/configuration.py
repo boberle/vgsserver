@@ -31,10 +31,13 @@ class AppConfiguration:
             random=self.random,
         )
 
+    def get_ratings_path_for_user(self, username: str) -> Path:
+        return self.settings.RATING_DIR_PATH / username / "ratings.json"
+
     @cache
     def get_ratings_for_user(self, username: str) -> RatingRepository:
         (self.settings.RATING_DIR_PATH / username).mkdir(exist_ok=True, parents=True)
-        path = self.settings.RATING_DIR_PATH / username / "ratings.json"
+        path = self.get_ratings_path_for_user(username)
         if path.exists():
             return InMemoryRatingRepository.from_file(path)
         else:

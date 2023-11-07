@@ -1,4 +1,5 @@
 import base64
+import json
 import shutil
 import tempfile
 from pathlib import Path
@@ -144,3 +145,74 @@ def test_add_play__invalid_rating(
         ),
     )
     assert res.status_code == 422
+
+
+def test_export_ratings__not_authenticated(client: TestClient) -> None:
+    res = client.get("/api/ratings/export/")
+    assert res.status_code == 401
+    assert res.json() == {"detail": "Not authenticated"}
+
+
+def test_export_ratings(
+    client: TestClient,
+    authorization_header: str,
+) -> None:
+    res = client.get(
+        "/api/ratings/export/", headers={"Authorization": authorization_header}
+    )
+    assert res.status_code == 200
+    got = res.json()
+    assert got == [
+        dict(
+            path="abc/one",
+            plays=[
+                dict(timestamp=123, rating=1),
+                dict(timestamp=456, rating=2),
+            ],
+        ),
+        dict(
+            path="abc/two",
+            plays=[
+                dict(timestamp=789, rating=4),
+                dict(timestamp=101, rating=5),
+            ],
+        ),
+        dict(
+            path="abc/three",
+            plays=[],
+        ),
+    ]
+
+
+def test_import_ratings__not_authenticated(client: TestClient) -> None:
+    res = client.post("/api/ratings/import/")
+    assert res.status_code == 401
+    assert res.json() == {"detail": "Not authenticated"}
+
+
+def test_import_ratings(
+    client_with_configuration: tuple[AppConfiguration, TestClient],
+    authorization_header: str,
+) -> None:
+    data = [
+        dict(
+            path="def/hello",
+            plays=[
+                dict(timestamp=987, rating=3),
+                dict(timestamp=654, rating=4),
+            ],
+        ),
+        dict(
+            path="ghi/bye",
+            plays=[],
+        ),
+    ]
+    configuration, client = client_with_configuration
+    res = client.post(
+        "/api/ratings/import/",
+        headers={"Authorization": authorization_header},
+        json=dict(songs=data),
+    )
+    assert res.status_code == 200
+    got = json.load(configuration.get_ratings_path_for_user("testuser").open())
+    assert got == data

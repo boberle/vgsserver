@@ -1,12 +1,15 @@
+import json
 from pathlib import Path
 from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
+from pydantic.v1.json import pydantic_encoder
 from starlette.responses import Response
 
 from configuration import AppConfiguration, get_app_configuration
+from ratings import InMemoryRatingRepository, PlayedSong
 from users import User
 
 api_router = APIRouter()
@@ -108,3 +111,34 @@ def _(
     )
     ratings.save()
     return SongPlayResponse(rating=ratings.get_rating(song_id))
+
+
+@api_router.get("/ratings/export/")
+def _(
+    configuration: AppConfiguration = Depends(get_app_configuration),
+    current_user: User = Depends(get_current_user),
+) -> list[PlayedSong]:
+    path = configuration.get_ratings_path_for_user(current_user.username)
+    if path.exists():
+        return InMemoryRatingRepository.load_songs_from_file(path)
+    return []
+
+
+class RatingsImportRequest(BaseModel):
+    songs: list[PlayedSong]
+
+
+@api_router.post("/ratings/import/")
+def _(
+    request: RatingsImportRequest,
+    configuration: AppConfiguration = Depends(get_app_configuration),
+    current_user: User = Depends(get_current_user),
+) -> Response:
+    path = configuration.get_ratings_path_for_user(current_user.username)
+    with path.open("w") as fh:
+        json.dump(
+            [s.model_dump() for s in request.songs],
+            fh,
+            default=pydantic_encoder,
+        )
+    return Response()
