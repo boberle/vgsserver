@@ -62,6 +62,7 @@ class PlayedSong(BaseModel):
 class InMemoryRatingRepository(RatingRepository):
     ratings: dict[str, PlayedSong]
     file: Optional[Path] = None
+    number_of_backup_files: int = 10
 
     def get_rating(self, song_id: str) -> Optional[float]:
         if song_id in self.ratings:
@@ -94,12 +95,26 @@ class InMemoryRatingRepository(RatingRepository):
 
     def save(self) -> None:
         if self.file is not None:
+            self.backup_file()
             with self.file.open("w") as fh:
                 json.dump(
                     [s.model_dump() for s in self.ratings.values()],
                     fh,
                     default=pydantic_encoder,
                 )
+
+    def backup_file(self) -> None:
+        assert self.file is not None
+        for n in reversed(range(self.number_of_backup_files)):
+            if n == 0:
+                source = self.file
+            else:
+                source = Path(str(self.file) + f".bak{n}")
+            target = Path(str(self.file) + f".bak{n+1}")
+            if target.exists():
+                target.unlink()
+            if source.exists():
+                source.rename(target)
 
     @classmethod
     def from_file(cls, file: Path) -> InMemoryRatingRepository:

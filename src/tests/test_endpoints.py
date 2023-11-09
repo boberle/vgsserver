@@ -1,9 +1,8 @@
 import base64
 import json
 import shutil
-import tempfile
 from pathlib import Path
-from typing import Generator, Iterator
+from typing import Iterator
 
 import pytest
 from starlette.testclient import TestClient
@@ -11,12 +10,6 @@ from starlette.testclient import TestClient
 from app import app
 from configuration import AppConfiguration, AppSettings, get_app_configuration
 from ratings import InMemoryRatingRepository
-
-
-@pytest.fixture
-def temp_directory() -> Generator[Path, None, None]:
-    with tempfile.TemporaryDirectory() as dir_name:
-        yield Path(dir_name)
 
 
 @pytest.fixture
