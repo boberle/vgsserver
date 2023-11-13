@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from functools import cache, cached_property
+from functools import cached_property
 from pathlib import Path
 from random import Random
 from typing import Optional
@@ -34,7 +34,6 @@ class AppConfiguration:
     def get_ratings_path_for_user(self, username: str) -> Path:
         return self.settings.RATING_DIR_PATH / username / "ratings.json"
 
-    @cache
     def get_ratings_for_user(self, username: str) -> RatingRepository:
         (self.settings.RATING_DIR_PATH / username).mkdir(exist_ok=True, parents=True)
         path = self.get_ratings_path_for_user(username)
